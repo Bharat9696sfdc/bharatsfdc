@@ -1,0 +1,68 @@
+Requirement 2:
+Build a basic lightning component that can query a list of 10 most recently created accounts and display it using a lightning app. 
+
+Apex controller:
+public class DisplayListOfRecordsUsingIteration {
+	@AuraEnabled
+    public static list<Account> fetchAccountRecords(){
+      return [select Name,Rating,Phone from Account Order By createdDate DESC LIMIT 10];        
+    }
+}
+
+Lightning Component:
+<aura:component controller="DisplayListOfRecordsUsingIteration">
+    <aura:attribute name="ShowRecords" type="List"/>
+    <aura:handler  name="init" value="{!this}" action="{!c.Accountcontroller}" />
+    <div class="size">
+    <table class="slds-table slds-table--bordered slds-table--striped">
+        <thead>
+            <tr>
+                <th scope="col"><span class="slds-truncate"> Name</span></th>
+                <th scope="col"><span class="slds-truncate"> Rating</span></th>
+                <th scope="col"><span class="slds-truncate"> Phone</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <aura:iteration items="{!v.ShowRecords}" var="A">
+                <tr>
+                    <td>{!A.Name}</td>
+                    <td>{!A.Rating}</td>
+                    <td>{!A.Phone}</td>
+                </tr>
+            </aura:iteration>
+        </tbody>
+    </table>
+        </div>
+</aura:component>
+
+Javascript Controller:
+
+({
+	Accountcontroller : function(component, event, helper) {
+        helper.Accounthelpermethod(component);	
+	}
+})
+
+Javascript Helper:
+
+({
+    Accounthelpermethod:function(component,event,helper){
+        var action = component.get("c.fetchAccountRecords");
+        action.setCallback(this,function(a){
+            component.set("v.ShowRecords",a.getReturnValue());
+        });
+        $A.enqueueAction(action);
+    }	
+})
+
+Css:
+.THIS.size {
+    height:1300px;
+    width:1500px;
+}
+
+Application:
+
+<aura:application Extends="force:slds">
+    <c:DisplayListOfRecordsUsingIteration/>	
+</aura:application>
